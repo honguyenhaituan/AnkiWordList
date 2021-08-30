@@ -25,6 +25,19 @@ class Database(object):
         else :
             raise (sqlite3.OperationalError, 'Database is not connected. Can not save Data!')
 
+    def getAllUrl(self): 
+        if self.conn: 
+            sql = "SELECT url FROM Webpage"
+            return self.conn.execute(sql)
+        else: 
+            raise (sqlite3.OperationalError, 'Database is not connected. Can not load Data!')
+    def getData(self, pattermUrl):
+        if self.conn: 
+            sql = "SELECT * FROM Webpage WHERE url LIKE '%s'" % pattermUrl
+            return self.conn.execute(sql)
+        else: 
+            raise (sqlite3.OperationalError, 'Database is not connected. Can not load Data!')
+
     def close(self):
         if self.conn:
             self.conn.close()

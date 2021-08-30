@@ -20,9 +20,15 @@ class Crawler(object):
         self.currentDepth = 1  
         self.database =  Database(dbFile)
         self.threadPool = ThreadPool(numThread)  
+        
         self.visitedHrefs = set()   
+        for url, in self.database.getAllUrl(): 
+            self.visitedHrefs.add(url)
+
         self.unvisitedHrefs = deque()    
-        self.unvisitedHrefs.append(seed) 
+        if seed not in self.visitedHrefs:
+            self.unvisitedHrefs.append(seed) 
+
         self.isCrawling = False
         self.keyword = None
 
