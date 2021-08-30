@@ -55,15 +55,18 @@ class PrintProgress(Thread):
         print('Finish!')
 
 
-def main():
-    args = argparse.ArgumentParser()
-    args.add_argument("--url", type=str, help="Specify the begin url")
-    args.add_argument("--depth", type=int, help="Specify the crawling depth")
-    args.add_argument("--logfile", type=str, default="spider.log",help="The log file path, Default: spider.log")
-    args.add_argument("--loglevel", type=int, default=3, help="The level of logging details. Larger number record more details. Default:3")
-    args.add_argument("--thread", type=int, default=10, help="The amount of threads. Default:10")
-    args.add_argument("--dbfile", type=str, default="data.sql", help="The SQLite file path. Default:data.sql")
-    args.add_argument("--key", type=str, help="The keyword for crawling. Default: None. For more than one word, quote them. example: --key 'Hello world'")
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(prog='crawl.py')
+    parser.add_argument('--url', type=str, help="Specify the begin url")
+    parser.add_argument("--depth", type=int, help="Specify the crawling depth")
+    parser.add_argument("--logFile", type=str, default="spider.log",help="The log file path, Default: spider.log")
+    parser.add_argument("--logLevel", type=int, default=3, help="The level of logging details. Larger number record more details. Default:3")
+    parser.add_argument("--thread", type=int, default=10, help="The amount of threads. Default:10")
+    parser.add_argument("--dbfile", type=str, default="data.sql", help="The SQLite file path. Default:data.sql")
+    parser.add_argument("--key", type=str, help="The keyword for crawling. Default: None. For more than one word, quote them. example: --key 'Hello world'")
+
+    args = parser.parse_args()
+    print(args)
 
     if not congifLogger(args.logFile, args.logLevel):
         print('\nPermission denied: %s' % args.logFile)
@@ -74,6 +77,3 @@ def main():
         printProgress.start()
         crawler.start()
         printProgress.printSpendingTime()
-
-if __name__ == '__main__':
-    main()

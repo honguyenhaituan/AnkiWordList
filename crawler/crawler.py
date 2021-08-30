@@ -24,6 +24,7 @@ class Crawler(object):
         self.unvisitedHrefs = deque()    
         self.unvisitedHrefs.append(seed) 
         self.isCrawling = False
+        self.keyword = None
 
     def start(self):
         print('\nStart Crawling\n')
@@ -90,7 +91,7 @@ class Crawler(object):
         for a in results:
             href = a.get('href').encode('utf8')
             if not href.startswith('http'):
-                href = urljoin(url, href)
+                href = urljoin(url, href.decode('utf-8'))
             hrefs.append(href)
         return hrefs
 
