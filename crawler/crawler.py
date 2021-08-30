@@ -86,12 +86,12 @@ class Crawler(object):
 
     def _getAllHrefsFromPage(self, url, pageSource):
         hrefs = []
-        soup = BeautifulSoup(pageSource)
+        soup = BeautifulSoup(pageSource, 'html.parser')
         results = soup.find_all('a',href=True)
         for a in results:
-            href = a.get('href').encode('utf8')
+            href = a.get('href')
             if not href.startswith('http'):
-                href = urljoin(url, href.decode('utf-8'))
+                href = urljoin(url, href)
             hrefs.append(href)
         return hrefs
 
