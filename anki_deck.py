@@ -1,7 +1,9 @@
 import re
+import argparse
 from bs4 import BeautifulSoup as bs
-from pathlib import Path
 from typing import List, Set, Dict, Tuple, Optional
+from genanki import genanki
+from crawler import Database
 
 
 def getVocabulary(html: str) -> str:
@@ -45,8 +47,41 @@ def cloze(html: str, words: List[str]) -> str:
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(prog='crawl.py')
+    parser.add_argument('--name', type=str, help="Name anki deck")
+    parser.add_argument('--dataPath', type=str, help="path Data")
+    opt = parser.parse_args()
+    print(opt)
+    name = opt.name
+
     with open('static/script.js') as file: 
         script = file.read()
 
     with open('static/layout.css') as file: 
-        script = file.read()
+        css = file.read()
+
+    my_model = genanki.Model(220072021, 
+                            name,
+                            fields=[{'name': 'front'},{'name': 'back'}],
+                            templates=[
+                                {
+                                'name': 'Oxford dictionary',
+                                'qfmt': '{{type:cloze:front}} {{cloze:front}}',
+                                'afmt': '{{type:cloze:front}} {{back}}' + script,
+                                },
+                            ], 
+                            css=css, 
+                            model_type=1
+                            )
+
+    deck = genanki.Deck(320072021, name)
+
+    database = Database(opt.dataPath)
+
+    for _, url, page, _ in database.getData("%definition%"):
+        word = getVocabulary(page)
+        front = cloze(page, [word])
+        note = genanki.Note(model=my_model, fields=[front, page])
+        deck.add_note(note)        
+
+    genanki.Package(deck).write_to_file('%s.apkg' % name)
