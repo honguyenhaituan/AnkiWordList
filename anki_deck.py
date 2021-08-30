@@ -6,15 +6,10 @@ from genanki import genanki
 from crawler import Database
 
 
-def getVocabulary(html: str) -> str:
-    html = bs(html, 'html.parser')
-
-    h1 = html.find("h1")
-    word = h1.contents[0]
-    if word is None:
-        h2 = html.find("h2")
-        word = h2.contents[0]
-
+def getVocabulary(url : str) -> str:
+    word = url.split("/")[-1]
+    word = re.split("_|#|[0-9]", word)[0]
+    word = word.replace("-", " ")
     return word
 
 def editHTMLWord(html) -> str: 
@@ -78,8 +73,11 @@ if __name__ == '__main__':
 
     database = Database(opt.dataPath)
 
-    for _, url, page, _ in database.getData("%definition%"):
-        word = getVocabulary(page)
+    for _, url, page, _ in database.getData("%/definition/%/%"):
+        word = getVocabulary(url)
+        if len(word) == 0: continue
+
+        page = editHTMLWord(page)
         front = cloze(page, [word])
         note = genanki.Note(model=my_model, fields=[front, page])
         deck.add_note(note)        
