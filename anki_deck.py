@@ -2,6 +2,8 @@ import re
 import argparse
 from bs4 import BeautifulSoup as bs
 from typing import List, Set, Dict, Tuple, Optional
+from tqdm import tqdm
+
 from genanki import genanki
 from crawler import Database
 
@@ -29,14 +31,19 @@ def editHTMLWord(html) -> str:
 def cloze(html: str, words: List[str]) -> str:
     html = bs(html, 'html.parser')
     for id, word in enumerate(words):
-        if len(word) >= 3: 
-            search = r'\b%s' % word
-        else: 
-            search = r'\b%s\b' % word
+        def replace_word(key):
+            def replace(search):
+                for text in html.find_all(text = re.compile(search)):
+                    editor = re.sub(search, "{{c%d::%s}}" % (id + 1, word), text)
+                    text.replace_with(editor)
+            
+            replace(r'\b%s\b|\b%s\b|\b%s\b|\b%s\b' % (key, key.upper(), key.lower(), key.capitalize()))
+            # for i in range(0, -4, -1): 
+            #     if len(key) + i <= 3 or key[i] == ' ' or key[i] == '-': break
+            #     pKey = key[:i]
+            #     replace(r'\b%s|\b%s|\b%s|\b%s' % (pKey, pKey.upper(), pKey.lower(), pKey.capitalize()))
 
-        for text in html.find_all(text = re.compile(search)):
-            editor = re.sub(search, "{{c%d::%s}}" % (id + 1, word), text)
-            text.replace_with(editor)
+        replace_word(word)
 
     return str(html)
 
@@ -73,7 +80,7 @@ if __name__ == '__main__':
 
     database = Database(opt.dataPath)
 
-    for _, url, page, _ in database.getData("%/definition/%/%"):
+    for _, url, page, _ in tqdm(database.getData("%/definition/%/%")):
         word = getVocabulary(url)
         if len(word) == 0: continue
 
